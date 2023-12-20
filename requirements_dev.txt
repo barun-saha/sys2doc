@@ -1,0 +1,14 @@
+google-generativeai
+google-cloud-aiplatform
+llama-index
+python-dotenv~=1.0.0
+Pillow~=10.1.0
+qdrant_client
+trulens_eval
+IPython
+streamlit
+streamlit_javascript
+
+requests~=2.31.0
+pydantic~=2.5.2
+litellm~=1.15.0

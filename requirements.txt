@@ -1,0 +1,5 @@
+google-generativeai
+python-dotenv~=1.0.0
+Pillow~=10.1.0
+streamlit
+requests~=2.31.0
