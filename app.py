@@ -1,5 +1,7 @@
 import logging
 import os
+import random
+
 import PIL
 import requests
 import streamlit as st
@@ -52,6 +54,12 @@ SAFETY_SETTINGS = [
     }
 ]
 
+SAMPLE_IMAGE_URLS = [
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Websocket_connection.png/220px-Websocket_connection.png',
+    'https://assets-global.website-files.com/5ff66329429d880392f6cba2/63fe48adb8834a29a618ce84_148.3.png',
+    'https://media.geeksforgeeks.org/wp-content/uploads/bus1.png',
+]
+
 
 @st.cache_resource
 def get_gemini_model():
@@ -87,7 +95,8 @@ def get_image_description(image: PIL.Image) -> str:
 load_dotenv()
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
-st.title('Sys2Doc: Generate Documentation Based on System Diagram')
+st.title('Sys2Doc')
+st.header('Generate Documentation Based on System Diagram')
 
 uploaded_file = st.file_uploader(
     'Choose an image file (PNG, JPG, or JPEG) that depicts your system,'
@@ -96,7 +105,10 @@ uploaded_file = st.file_uploader(
 )
 
 st.write('OR provide the URL of the image:')
-img_url = st.text_input('URL of the image')
+img_url = st.text_input(
+    label='URL of the image',
+    value=random.choice(SAMPLE_IMAGE_URLS),
+)
 st.markdown('(*If an image is uploaded and a URL is also provided, Sys2Doc will consider the uploaded image*)')
 
 if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
@@ -115,14 +127,18 @@ if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
             file_details = {
                 'file_name': os.path.basename(img_url),
                 'file_type': the_img.format,
-                'file_info': the_img.info
+                # 'file_info': the_img.info
             }
 
         if the_img.mode in ('RGBA', 'P'):
             the_img = the_img.convert('RGB')
 
         st.header('Image')
-        st.write(file_details)
+
+        try:
+            st.write(file_details)
+        except Exception:
+            pass
 
         st.image(the_img, width=250)
         description = get_image_description(the_img)
