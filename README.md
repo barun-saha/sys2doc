@@ -1,5 +1,5 @@
 ---
-title: Sys2doc
+title: Sys2Doc
 emoji: 🦀
 colorFrom: pink
 colorTo: green
@@ -10,4 +10,8 @@ pinned: false
 license: mit
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# Sys2Doc
+
+Generate documentation of your system based on any kind of diagram. It can be any kind of diagram: system architecture, flowchart, state machine, and so on.
+
+Powered by Gemini Pro Vision and TruEra.
