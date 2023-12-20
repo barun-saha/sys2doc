@@ -1,6 +1,7 @@
 import logging
 import os
 import PIL
+import requests
 import streamlit as st
 import google.generativeai as genai
 
@@ -65,14 +66,6 @@ def get_gemini_model():
     )
 
 
-def load_image(image_file: st.runtime.uploaded_file_manager.UploadedFile):
-    img = PIL.Image.open(image_file)
-    if img.mode in ("RGBA", "P"):
-        img = img.convert("RGB")
-
-    return img
-
-
 def get_image_description(image: PIL.Image) -> str:
     """
     Use Gemini Pro Vision LMM to generate a response.
@@ -100,18 +93,35 @@ uploaded_file = st.file_uploader(
     type=SUPPORTED_FILE_EXTENSIONS
 )
 
-if uploaded_file is not None:
-    # Show the uploaded image & related info
-    file_details = {
-        'file_name': uploaded_file.name,
-        'file_type': uploaded_file.type,
-        'file_size': uploaded_file.size
-    }
-    st.header('Image')
-    st.write(file_details)
+st.write('OR provide the URL of the image:')
+img_url = st.text_input('URL of the image')
+st.markdown('(*If an image is uploaded and a URL is also provided, Sys2Doc will consider the uploaded image*)')
 
+if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
+    # Show the uploaded image & related info
+    print(f'{img_url=}')
     try:
-        the_img = load_image(uploaded_file)
+        if uploaded_file:
+            the_img = PIL.Image.open(uploaded_file)
+            file_details = {
+                'file_name': uploaded_file.name,
+                'file_type': uploaded_file.type,
+                'file_size': uploaded_file.size
+            }
+        elif img_url:
+            the_img = PIL.Image.open(requests.get(img_url, stream=True).raw)
+            file_details = {
+                'file_name': os.path.basename(img_url),
+                'file_type': the_img.format,
+                'file_info': the_img.info
+            }
+
+        if the_img.mode in ('RGBA', 'P'):
+            the_img = the_img.convert('RGB')
+
+        st.header('Image')
+        st.write(file_details)
+
         st.image(the_img, width=250)
         description = get_image_description(the_img)
         st.header('Description')
@@ -122,6 +132,8 @@ if uploaded_file is not None:
         st.error(f'An error occurred while loading the image: {uie}')
         logging.debug(f'An error occurred while loading the image: {uie}\n'
                       f'File details: {file_details}')
+    except requests.exceptions.MissingSchema as ms:
+        st.error(f'Please specify a proper URL for the image.')
     finally:
         st.divider()
         st.write('Sys2Doc is an experimental prototype, with no guarantee provided whatsoever.'
