@@ -15,8 +15,10 @@ logging.basicConfig(
 
 SUPPORTED_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg']
 IMAGE_PROMPT = (
-    'The provided image relates to a system.'
-    ' The image could be of any type, such as architecture diagram, flowchart, state machine, and so on.'
+    # 'You are a systems expert.'
+    ' The provided image relates to a system.'
+    # ' Refuse to answer if the provided image is not related to any system or software in any way.'
+    ' The system\'s image could be of any type, such as architecture diagram, flowchart, state machine, and so on.'
     ' Based SOLELY on the image, describe the system and its different components in detail.'
     ' You should not use any prior knowledge except for universal truths.'
     ' If relevant, describe how the relevant components interact and how information flows.'
