@@ -1,6 +1,5 @@
 import logging
 import os
-import random
 
 import PIL
 import requests
@@ -55,17 +54,11 @@ SAFETY_SETTINGS = [
     }
 ]
 
-SAMPLE_IMAGE_URLS = [
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Websocket_connection.png/220px-Websocket_connection.png',
-    'https://assets-global.website-files.com/5ff66329429d880392f6cba2/63fe48adb8834a29a618ce84_148.3.png',
-    'https://media.geeksforgeeks.org/wp-content/uploads/bus1.png',
-]
-
 
 @st.cache_resource
 def get_gemini_model():
     """
-    Get the Gemini Pro Vision model.
+    Get the Gemini model.
 
     :return: The model
     """
@@ -98,7 +91,7 @@ genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 st.title('Sys2Doc')
 st.header(
-    'Generate Documentation Based on System Diagram—powered by Gemini 1.5 Flash'
+    'Generate Documentation Based on System Diagram — powered by Gemini 1.5 Flash'
 )
 
 uploaded_file = st.file_uploader(
@@ -107,36 +100,18 @@ uploaded_file = st.file_uploader(
     type=SUPPORTED_FILE_EXTENSIONS
 )
 
-st.write('OR provide the URL of the image:')
-img_url = st.text_input(
-    label='URL of the image',
-    value=random.choice(SAMPLE_IMAGE_URLS),
-)
-st.markdown(
-    '(*If an image is uploaded and a URL is also provided,'
-    ' Sys2Doc will consider the uploaded image*)'
-)
-
-if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
+if uploaded_file is not None:
     # Show the uploaded image & related info
     the_img = None
     file_details = None
 
     try:
-        if uploaded_file:
-            the_img = PIL.Image.open(uploaded_file)
-            file_details = {
-                'file_name': uploaded_file.name,
-                'file_type': uploaded_file.type,
-                'file_size': uploaded_file.size
-            }
-        elif img_url:
-            the_img = PIL.Image.open(requests.get(img_url, stream=True).raw)
-            file_details = {
-                'file_name': os.path.basename(img_url),
-                'file_type': the_img.format,
-                # 'file_info': the_img.info
-            }
+        the_img = PIL.Image.open(uploaded_file)
+        file_details = {
+            'file_name': uploaded_file.name,
+            'file_type': uploaded_file.type,
+            'file_size': uploaded_file.size
+        }
 
         if the_img and the_img.mode in ('RGBA', 'P'):
             the_img = the_img.convert('RGB')
