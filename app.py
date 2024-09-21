@@ -30,10 +30,11 @@ IMAGE_PROMPT = (
 )
 
 GENERATION_CONFIG = {
-    "temperature": 0.9,
-    "top_p": 1,
-    "top_k": 1,
+    "temperature": 0,
+    "top_p": 0.5,
+    "top_k": 10,
     "max_output_tokens": 2048,
+    "response_mime_type": "text/plain",
 }
 SAFETY_SETTINGS = [
     {
@@ -70,7 +71,7 @@ def get_gemini_model():
     """
 
     return genai.GenerativeModel(
-        model_name='gemini-pro-vision',
+        model_name='gemini-1.5-flash',
         generation_config=GENERATION_CONFIG,
         safety_settings=SAFETY_SETTINGS
     )
@@ -96,7 +97,9 @@ load_dotenv()
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 st.title('Sys2Doc')
-st.header('Generate Documentation Based on System Diagram')
+st.header(
+    'Generate Documentation Based on System Diagram—powered by Gemini 1.5 Flash'
+)
 
 uploaded_file = st.file_uploader(
     'Choose an image file (PNG, JPG, or JPEG) that depicts your system,'
@@ -109,11 +112,16 @@ img_url = st.text_input(
     label='URL of the image',
     value=random.choice(SAMPLE_IMAGE_URLS),
 )
-st.markdown('(*If an image is uploaded and a URL is also provided, Sys2Doc will consider the uploaded image*)')
+st.markdown(
+    '(*If an image is uploaded and a URL is also provided,'
+    ' Sys2Doc will consider the uploaded image*)'
+)
 
 if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
     # Show the uploaded image & related info
-    print(f'{img_url=}')
+    the_img = None
+    file_details = None
+
     try:
         if uploaded_file:
             the_img = PIL.Image.open(uploaded_file)
@@ -130,15 +138,13 @@ if uploaded_file is not None or (img_url is not None and len(img_url) > 0):
                 # 'file_info': the_img.info
             }
 
-        if the_img.mode in ('RGBA', 'P'):
+        if the_img and the_img.mode in ('RGBA', 'P'):
             the_img = the_img.convert('RGB')
 
         st.header('Image')
 
-        try:
+        if file_details:
             st.write(file_details)
-        except Exception:
-            pass
 
         st.image(the_img, width=250)
         description = get_image_description(the_img)
